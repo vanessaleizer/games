@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>משחק סכום 10</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+        h1 {
+            color: deepskyblue;
+            margin-bottom: 20px;
+        }
+        #game-board {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            max-width: 500px;
+        }
+        .card {
+            width: 80px;
+            height: 80px;
+            background-color: lightcyan;
+            border: 4px solid deepskyblue;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .card:hover {
+            background-color: cyan;
+        }
+        #message {
+            margin-top: 20px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>משחק סכום 10</h1>
+    <div id="game-board"></div>
+    <div id="message"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+    <script>
+        const gameBoard = document.getElementById('game-board');
+        const messageElement = document.getElementById('message');
+        let selectedCards = [];
+        let numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+        numbers = numbers.sort(() => Math.random() - 0.5);
+
+        function createCard(number) {
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.textContent = number;
+            card.addEventListener('click', () => selectCard(card, number));
+            return card;
+        }
+
+        function selectCard(card, number) {
+            if (selectedCards.length < 2 && !selectedCards.includes(card) && !card.classList.contains('hidden')) {
+                card.style.backgroundColor = 'lightgreen';
+                selectedCards.push({ card, number });
+
+                if (selectedCards.length === 2) {
+                    setTimeout(checkMatch, 500);
+                }
+            }
+        }
+
+        function checkMatch() {
+            const [card1, card2] = selectedCards;
+            const sum = card1.number + card2.number;
+
+            if (sum === 10) {
+                messageElement.textContent = 'מעולה! הסכום שווה 10';
+                card1.card.classList.add('hidden');
+                card2.card.classList.add('hidden');
+                card1.card.style.visibility = 'hidden';
+                card2.card.style.visibility = 'hidden';
+                confetti({
+                    particleCount: 100,
+                    spread: 70,
+                    origin: { y: 0.6 }
+                });
+            } else {
+                messageElement.textContent = 'אוי, הסכום שלנו לא 10 נסה שנית';
+                card1.card.style.backgroundColor = 'lightcyan';
+                card2.card.style.backgroundColor = 'lightcyan';
+            }
+
+            selectedCards = [];
+
+            if (document.querySelectorAll('.card.hidden').length === numbers.length) {
+                messageElement.textContent = 'אלופים סיימתם את המשחק';
+                confetti({
+                    particleCount: 200,
+                    spread: 160,
+                    origin: { y: 0.6 }
+                });
+            }
+        }
+
+        numbers.forEach(number => {
+            gameBoard.appendChild(createCard(number));
+        });
+    </script>
+</body>
+</html>
